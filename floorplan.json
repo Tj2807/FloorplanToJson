@@ -1,0 +1,1 @@
+{"floorplan": {"corners": {"0": {"y": 2, "x": 4}, "1": {"y": 6, "x": 8}}, "walls": [{"corner2": 1, "corner1": 0}, {"corner2": 0, "corner1": 1}]}}

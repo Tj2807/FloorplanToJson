@@ -10,6 +10,6 @@ cv2.imshow('img2', img2)
 
 kernel = np.ones((2,2), 'uint8')
 img3 = cv2.erode(img2, kernel, 1)
-#img3 = cv2.dilate(img2, kernel, 5)
+# img3 = cv2.dilate(img2, kernel, 5)
 cv2.imshow('img3', img3)
 cv2.waitKey(0)
