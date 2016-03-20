@@ -38,20 +38,19 @@ img3 = cv2.erode(img2, element, iterations=1)
 kernel = np.ones((5, 5), np.uint8)
 img4 = cv2.morphologyEx(img3, cv2.MORPH_CLOSE, kernel)
 
-
 # Thin the image
 kernel = np.ones((2, 2), np.uint8)
 img5 = cv2.erode(img4, kernel, iterations=2)
 
-
 # Obtain image skeleton
 img6 = skeleton(img5)
-
 cv2.imshow('img6', img6)
 
+img7 = cv2.dilate(img6, element, iterations=2)
+cv2.imshow('img7', img7)
 
 # Hough transform for line detection
-minLineLength = 5
+minLineLength = 10
 maxLineGap = 20
 lines = cv2.HoughLinesP(img6, 1, np.pi / 180, 100, minLineLength, maxLineGap)
 

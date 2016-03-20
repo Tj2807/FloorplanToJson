@@ -22,7 +22,7 @@ def skeleton(img):
         return skel
 
 
-img = cv2.imread('K:\FloorplanToJson\images\FloorPlan1.jpg')
+img = cv2.imread('K:\FloorplanToJson\images\FloorPlan6.png')
 img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 ret, img2 = cv2.threshold(img1, 70, 255, cv2.THRESH_BINARY_INV)
 
