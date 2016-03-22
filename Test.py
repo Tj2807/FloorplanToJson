@@ -2,9 +2,6 @@ import numpy as np
 import cv2
 
 
-# from scipy.spatial import distance
-
-
 def skeleton(img):
     size = np.size(img)
     skel = np.zeros(img.shape, np.uint8)
@@ -23,6 +20,11 @@ def skeleton(img):
             done = True
 
         return skel
+
+
+def dist(vertex1, vertex2):
+    distance = (sum(np.absolute(vertex1 - vertex2) ** 2)) ** .5
+    return distance
 
 
 img = cv2.imread('K:\FloorplanToJson\images\FloorPlan6.png')
@@ -44,13 +46,11 @@ img5 = cv2.erode(img4, kernel, iterations=2)
 
 # Obtain image skeleton
 img6 = skeleton(img5)
-cv2.imshow('img6', img6)
 
-img7 = cv2.dilate(img6, element, iterations=2)
-cv2.imshow('img7', img7)
+# cv2.imshow('img6', img6)
 
 # Hough transform for line detection
-minLineLength = 10
+minLineLength = 5
 maxLineGap = 20
 lines = cv2.HoughLinesP(img6, 1, np.pi / 180, 100, minLineLength, maxLineGap)
 
@@ -61,52 +61,81 @@ print(lines[0, 0, :])
 print(lines.shape)
 """
 
-# arr = np.hstack((arr, np.array([1, 2, 3])))
-
+# Reduce the number of closely spaced lines by comparing difference in their endpoints
 newline = np.array([])
 newline = np.hstack((newline, lines[0, 0, :]))
 newline = newline[np.newaxis, :]
-print(newline)
+# print(newline)
 for i in range(1, lines.shape[0]):
-    # print('i=', i)
     flag = 0
     for j in range(newline.shape[0]):
-        # print('j=', j)
-        # print('lines=', lines[i, 0, :])
-        # print('newline=', newline[j, :])
         check = np.absolute(lines[i, 0, :] - newline[j, :])
-        # print('check=', check)
-        # print((check < 10).all())
         if (check < 10).all():
-            # print('Inside check')
             newline[j, :] = (newline[j, :] + lines[i, 0, :]) / 2
             flag = 1
             break
-
     if flag == 0:
         newline = np.vstack((newline, lines[i, 0, :]))
 
-print('newline:')
+# print('newline:')
 # print(newline)
 
 newline = np.round(newline)
 newline = newline.astype(int)
 
-print('lines=', lines.shape)
-print(lines)
-print('newline=', newline.shape)
-print(newline)
+# print('lines=', lines.shape)
+# print(lines)
 
+# Remove duplicate corners
+vertices = np.vstack((newline[:, 0:2], newline[:, 2:4]))
+k = 0
+corners = np.array([])
+corners = np.hstack((corners, vertices[0, :]))
+corners = np.expand_dims(corners, axis=0)
+print(corners.shape)
+for i in range(1, vertices.shape[0]):
+    flag = 0
+    for j in range(corners.shape[0]):
+        vertex1 = vertices[i, :]
+        vertex2 = corners[j, :]
+        """
+        print('i=', i, 'j=', j)
+        print('vertex1', vertex1)
+        print('vertex2', vertex2)
+        print('dis', dist(vertex1, vertex2), '\n')
+        """
+        if dist(vertex1, vertex2) < 20:
+            corners[j, :] = (vertex1 + vertex2) / 2
+            flag = 1
+            break
+
+    if flag == 0:
+        corners = np.vstack((corners, vertex1))
+
+# corners[0, 0:3] = []
+vertices = np.round(vertices)
+vertices = vertices.astype(int)
+corners = np.round(corners)
+corners = corners.astype(int)
+
+print('vertices=', vertices.shape)
+print(vertices)
+
+print('corners=', corners.shape)
+print(corners)
+
+# Show detected lines with coordinate reduction algorithm
 for [x1, y1, x2, y2] in newline:
     cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
+# Show detected lines without coordinate reduction algorithm
 img_copy = img
 for [[x1, y1, x2, y2]] in lines:
     cv2.line(img_copy, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
+
 cv2.imshow('img4', img4)
 cv2.imshow('img', img)
 cv2.imshow('img_copy', img_copy)
-
 cv2.waitKey(0)
-# cv2.imwrite('houghlines5.jpg',img)
+
