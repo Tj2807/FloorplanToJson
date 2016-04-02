@@ -30,7 +30,7 @@ def dist(vertex1, vertex2):
 cv2.destroyAllWindows()
 img = cv2.imread('K:\FloorplanToJson\images\FloorPlan1.jpg')
 img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-ret, img2 = cv2.threshold(img1, 100, 255, cv2.THRESH_BINARY_INV)
+ret, img2 = cv2.threshold(img1, 70, 255, cv2.THRESH_BINARY_INV)
 
 element = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
 
