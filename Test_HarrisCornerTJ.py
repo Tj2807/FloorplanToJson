@@ -7,7 +7,7 @@ def dist(vertex1, vertex2):
     return distance
 
 
-filename = '.\images\FloorPlan6.png'
+filename = 'T:\Projects\FloorplanToJson\images\FloorPlan6.png'
 cv2.destroyAllWindows()
 img = cv2.imread(filename)
 img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
