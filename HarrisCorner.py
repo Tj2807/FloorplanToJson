@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import imtool
-
+import toJson
 
 def dist(vertex1, vertex2):
     distance = (sum(np.absolute(vertex1 - vertex2) ** 2)) ** .5
@@ -23,7 +23,8 @@ def draw_line(x1, y1, x2, y2, skip):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-filename = '.\images\FloorPlan3.jpg'
+filename = "./images/floorplan11.jpg"
+# ----------------------------------------------------------------------------------------------------------------------
 cv2.destroyAllWindows()
 img = cv2.imread(filename)
 img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -40,12 +41,12 @@ img3 = cv2.erode(img2, element, iterations=1)
 kernel = np.ones((5, 5), np.uint8)
 img4 = cv2.morphologyEx(img3, cv2.MORPH_CLOSE, kernel)
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Remove the small disturbance caused by noise and text in between
 img4_copy = img4
 
 _, contours, hierarchy = cv2.findContours(img4, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
 for i in contours:
     area = cv2.contourArea(i)
     if 0.0 <= area < 100.0:
@@ -55,6 +56,7 @@ for i in contours:
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Find Harris corners
+
 dst = cv2.cornerHarris(np.float32(img4), 5, 5, 0.1)
 r, c = np.nonzero(dst > .5 * dst.max())
 
@@ -85,12 +87,14 @@ corners = corners.astype(int)
 
 # result is dilated for marking the corners, not important
 dst = cv2.dilate(dst, None)
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Find whether a wall exists between two corners
 skip = .1
+#img4 = cv2.dilate(img4, element, iterations=10)
+# cv2.imshow('it=10', img4)
+
 img4 = cv2.dilate(img4, element, iterations=15)
-cv2.imshow('it=15', img4)
+# cv2.imshow('it=15', img4)
 
 img5 = np.array(np.zeros(img.shape))
 for k in range(img.shape[2]):
@@ -132,9 +136,10 @@ for i in range(corners.shape[0]):
 
 # Output
 print('walls=', walls)
+toJson.giveMeJson(walls)
 imtool.coors('img5')  # Creates a named window and attaches coordinates mouse callback with it
 cv2.imshow('img5', img5)
 cv2.imshow('dst', img)
-cv2.imwrite('.\Output Images_Harris\FloorPlan3.jpg', img5)
+cv2.imwrite('.\Output Images_Harris\FloorPlan11.jpg', img5)
 if cv2.waitKey(0) & 0xff == 27:
     cv2.destroyAllWindows()
