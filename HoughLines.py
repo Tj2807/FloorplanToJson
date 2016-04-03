@@ -28,7 +28,7 @@ def dist(vertex1, vertex2):
 
 
 cv2.destroyAllWindows()
-img = cv2.imread('.\images\FloorPlan1.jpg')
+img = cv2.imread('.\images\FloorPlan6.png')
 img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 ret, img2 = cv2.threshold(img1, 70, 255, cv2.THRESH_BINARY_INV)
 
@@ -41,9 +41,21 @@ img3 = cv2.erode(img2, element, iterations=1)
 kernel = np.ones((5, 5), np.uint8)
 img4 = cv2.morphologyEx(img3, cv2.MORPH_CLOSE, kernel)
 
+img4_copy = img4
+
+_, contours, hierarchy = cv2.findContours(img4, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+for i in contours:
+    area = cv2.contourArea(i)
+    if 0.0 <= area < 100.0:
+        cv2.drawContours(img4_copy, [i], 0, (0, 0, 0), -1)
+    else:
+        cv2.drawContours(img4_copy, [i], 0, (255, 0, 0), -1)
+
+cv2.imshow('img4_copy', img4_copy)
 # Thin the image
 kernel = np.ones((3, 3), np.uint8)
-img5 = cv2.erode(img4, kernel, iterations=2)
+img5 = cv2.erode(img4_copy, kernel, iterations=2)
 
 # Obtain image skeleton
 img6 = skeleton(img5)
@@ -54,7 +66,7 @@ cv2.imshow('img4', img4)
 # Hough transform for line detection
 minLineLength = 5
 maxLineGap = 20
-lines = cv2.HoughLinesP(img6, 1, np.pi / 180, 100, minLineLength, maxLineGap)
+lines = cv2.HoughLinesP(img6, 1, np.pi / 90, 200, minLineLength, maxLineGap)
 print('lines=', lines.shape)
 lines = lines[:, 0, :]
 

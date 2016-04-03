@@ -22,8 +22,7 @@ def draw_line(x1, y1, x2, y2, skip):
     return xp, yp
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-filename = '.\images\FloorPlan6.png'
+filename = '.\images\FloorPlan10.jpg'
 cv2.destroyAllWindows()
 img = cv2.imread(filename)
 img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -31,16 +30,13 @@ ret, img2 = cv2.threshold(img1, 70, 255, cv2.THRESH_BINARY_INV)
 
 element = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
 
-#  ---------------------------------------------------------------------------------------------------------------------
-#  Erosion to remove noise
+# Erosion to remove noise
 img3 = cv2.erode(img2, element, iterations=1)
 
-# ----------------------------------------------------------------------------------------------------------------------
 # Closing to fill small holes inside foreground
 kernel = np.ones((5, 5), np.uint8)
 img4 = cv2.morphologyEx(img3, cv2.MORPH_CLOSE, kernel)
 
-# ----------------------------------------------------------------------------------------------------------------------
 # Remove the small disturbance caused by noise and text in between
 img4_copy = img4
 
@@ -53,7 +49,6 @@ for i in contours:
     else:
         cv2.drawContours(img4_copy, [i], 0, (255, 0, 0), -1)
 
-# ----------------------------------------------------------------------------------------------------------------------
 # Find Harris corners
 dst = cv2.cornerHarris(np.float32(img4), 5, 5, 0.1)
 r, c = np.nonzero(dst > .5 * dst.max())
@@ -62,18 +57,17 @@ r, c = np.nonzero(dst > .5 * dst.max())
 # print('c=', c.shape, c)
 # print('\n\n')
 
-# ----------------------------------------------------------------------------------------------------------------------
 # Removing nearby corners
 corners = np.array([])
 corners = np.hstack((corners, np.array([r[0], c[0]])))
 corners = np.expand_dims(corners, axis=0)
-# print(corners.shape)
+print(corners.shape)
 for i in range(1, r.shape[0]):
     flag = 0
     for j in range(corners.shape[0]):
         vertex1 = np.array([r[i], c[i]])
         vertex2 = corners[j]
-        if dist(vertex1, vertex2) < 30:
+        if dist(vertex1, vertex2) < 20:
             corners[j, :] = (vertex1 + vertex2) / 2
             flag = 1
             break
@@ -81,34 +75,37 @@ for i in range(1, r.shape[0]):
         corners = np.vstack((corners, np.array([r[i], c[i]])))
 corners = np.round(corners)
 corners = corners.astype(int)
-# print('corners=', corners.shape, corners)
+print('corners=', corners.shape, corners)
 
 # result is dilated for marking the corners, not important
 dst = cv2.dilate(dst, None)
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Threshold for an optimal value, it may vary depending on the image.
-mask = np.zeros(img4.shape, dtype=bool)
-mask[corners[:, 0], corners[:, 1]] = True
-
-mask = cv2.dilate(mask.astype(np.float32), None, iterations=2)
-mask = mask > 0
-img5[mask] = [0, 0, 255]
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Find whether a wall exists between two corners
-skip = .1
-img4 = cv2.dilate(img4, element, iterations=5)
-cv2.imshow('img4', img4)
 
 img5 = np.array(np.zeros(img.shape))
 for k in range(img.shape[2]):
     img5[:, :, k] = img4
 
-walls = np.empty((0, 4), np.uint8)
+# Threshold for an optimal value, it may vary depending on the image.
+mask = np.zeros(img4.shape, dtype=np.uint8)
+mask[corners[:, 0], corners[:, 1]] = 255
+cv2.imshow('mask', mask)
 
+mask = cv2.dilate(mask.astype(np.float32), None, iterations=15)
+print('img4=', img4.shape, 'type=', img4.dtype)
+print('mask=', mask.shape, 'type=', mask.dtype)
+cv2.imshow('mask_after dilation', mask)
+
+img6 = cv2.bitwise_and(img4, cv2.bitwise_not(mask.astype(np.uint8)))
+cv2.imshow('img6', img6)
+cv2.imshow('img4', img4)
+cv2.imshow('mask_after bitwise operation', cv2.bitwise_not(mask.astype(np.uint8)))
+mask = mask > 0
+img5[mask] = [0, 0, 255]
+
+# Find whether a wall exists between two corners
+"""
+skip = .1
 for i in range(corners.shape[0]):
-    for j in range(i+1, corners.shape[0]):
+    for j in range(corners.shape[0]):
         if i == j:
             continue
         xp, yp = draw_line(corners[i, 0], corners[i, 1], corners[j, 0], corners[j, 1], skip)
@@ -120,21 +117,19 @@ for i in range(corners.shape[0]):
         yp = yp.astype(int)
 
         lineIndices = img4[xp, yp]
-        percentage = np.sum(lineIndices) / (255*lineIndices.shape[0])
+        percentage = np.sum(lineIndices == 255) / lineIndices.shape[0]
 
-        if percentage >= .9:
+        if percentage >= .8:
             mask = np.zeros(img4.shape, dtype=bool)
             mask[xp, yp] = True
 
             mask = cv2.dilate(mask.astype(np.float32), None, iterations=1)
             mask = mask > 0
             img5[mask] = [255, 0, 0]
-            walls = np.vstack((walls, [corners[i, 0], corners[i, 1], corners[j, 0], corners[j, 1]]))
-
+"""
 # Output
-print('walls=', walls)
 imtool.coors('img5')  # Creates a named window and attaches coordinates mouse callback with it
 cv2.imshow('img5', img5)
-cv2.imshow('dst', img)
+# cv2.imshow('dst', img)
 if cv2.waitKey(0) & 0xff == 27:
     cv2.destroyAllWindows()
