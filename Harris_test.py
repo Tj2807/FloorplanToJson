@@ -89,7 +89,7 @@ mask = np.zeros(img4.shape, dtype=np.uint8)
 mask[corners[:, 0], corners[:, 1]] = 255
 cv2.imshow('mask', mask)
 
-mask = cv2.dilate(mask.astype(np.float32), None, iterations=15)
+mask = cv2.dilate(mask.astype(np.float32), None, iterations=10)
 print('img4=', img4.shape, 'type=', img4.dtype)
 print('mask=', mask.shape, 'type=', mask.dtype)
 cv2.imshow('mask_after dilation', mask)

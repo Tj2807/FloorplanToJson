@@ -23,7 +23,7 @@ def draw_line(x1, y1, x2, y2, skip):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-filename = '.\images\FloorPlan6.png'
+filename = '.\images\FloorPlan3.jpg'
 cv2.destroyAllWindows()
 img = cv2.imread(filename)
 img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -89,9 +89,6 @@ dst = cv2.dilate(dst, None)
 # ----------------------------------------------------------------------------------------------------------------------
 # Find whether a wall exists between two corners
 skip = .1
-img4 = cv2.dilate(img4, element, iterations=10)
-cv2.imshow('it=10', img4)
-
 img4 = cv2.dilate(img4, element, iterations=15)
 cv2.imshow('it=15', img4)
 
@@ -138,5 +135,6 @@ print('walls=', walls)
 imtool.coors('img5')  # Creates a named window and attaches coordinates mouse callback with it
 cv2.imshow('img5', img5)
 cv2.imshow('dst', img)
+cv2.imwrite('.\Output Images_Harris\FloorPlan3.jpg', img5)
 if cv2.waitKey(0) & 0xff == 27:
     cv2.destroyAllWindows()

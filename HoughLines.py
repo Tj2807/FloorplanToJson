@@ -28,7 +28,7 @@ def dist(vertex1, vertex2):
 
 
 cv2.destroyAllWindows()
-img = cv2.imread('.\images\FloorPlan6.png')
+img = cv2.imread('.\images\FloorPlan2.jpg')
 img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 ret, img2 = cv2.threshold(img1, 70, 255, cv2.THRESH_BINARY_INV)
 
@@ -119,4 +119,5 @@ for [x1, y1, x2, y2] in walls:
     cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
 cv2.imshow('img', img)
+cv2.imwrite('.\Output Images_Hough\FloorPlan2.jpg', img)
 cv2.waitKey(0)
