@@ -89,8 +89,11 @@ dst = cv2.dilate(dst, None)
 # ----------------------------------------------------------------------------------------------------------------------
 # Find whether a wall exists between two corners
 skip = .1
-img4 = cv2.dilate(img4, element, iterations=5)
-cv2.imshow('img4', img4)
+img4 = cv2.dilate(img4, element, iterations=10)
+cv2.imshow('it=10', img4)
+
+img4 = cv2.dilate(img4, element, iterations=15)
+cv2.imshow('it=15', img4)
 
 img5 = np.array(np.zeros(img.shape))
 for k in range(img.shape[2]):
@@ -121,7 +124,7 @@ for i in range(corners.shape[0]):
         lineIndices = img4[xp, yp]
         percentage = np.sum(lineIndices) / (255 * lineIndices.shape[0])
 
-        if percentage >= .9:
+        if percentage >= .95:
             mask = np.zeros(img4.shape, dtype=bool)
             mask[xp, yp] = True
 
