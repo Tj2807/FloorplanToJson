@@ -87,15 +87,6 @@ corners = corners.astype(int)
 dst = cv2.dilate(dst, None)
 
 # ----------------------------------------------------------------------------------------------------------------------
-# Threshold for an optimal value, it may vary depending on the image.
-mask = np.zeros(img4.shape, dtype=bool)
-mask[corners[:, 0], corners[:, 1]] = True
-
-mask = cv2.dilate(mask.astype(np.float32), None, iterations=2)
-mask = mask > 0
-img5[mask] = [0, 0, 255]
-
-# ----------------------------------------------------------------------------------------------------------------------
 # Find whether a wall exists between two corners
 skip = .1
 img4 = cv2.dilate(img4, element, iterations=5)
@@ -105,10 +96,18 @@ img5 = np.array(np.zeros(img.shape))
 for k in range(img.shape[2]):
     img5[:, :, k] = img4
 
+# ----------------------------------------------------------------------------------------------------------------------
+# Show corners found by Harris algorithm
+mask = np.zeros(img4.shape, dtype=bool)
+mask[corners[:, 0], corners[:, 1]] = True
+mask = cv2.dilate(mask.astype(np.float32), None, iterations=2)
+mask = mask > 0
+img5[mask] = [0, 0, 255]
+
 walls = np.empty((0, 4), np.uint8)
 
 for i in range(corners.shape[0]):
-    for j in range(i+1, corners.shape[0]):
+    for j in range(i + 1, corners.shape[0]):
         if i == j:
             continue
         xp, yp = draw_line(corners[i, 0], corners[i, 1], corners[j, 0], corners[j, 1], skip)
@@ -120,7 +119,7 @@ for i in range(corners.shape[0]):
         yp = yp.astype(int)
 
         lineIndices = img4[xp, yp]
-        percentage = np.sum(lineIndices) / (255*lineIndices.shape[0])
+        percentage = np.sum(lineIndices) / (255 * lineIndices.shape[0])
 
         if percentage >= .9:
             mask = np.zeros(img4.shape, dtype=bool)
